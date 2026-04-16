@@ -1,0 +1,6 @@
+pandas
+pandas-ta
+ccxt
+scikit-learn
+xgboost
+pyarrow
