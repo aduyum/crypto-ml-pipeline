@@ -26,4 +26,3 @@ docker run crypto-pipeline
 
 ## Performance Note
 The model achieves a **~48% accuracy** on a 3-class classification problem. In high-frequency volatile markets, this represents a strong signal-to-noise ratio, prioritizing risk management (the 'Hold' class) over aggressive over-trading.
-```
