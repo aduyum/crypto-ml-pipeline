@@ -1,3 +1,9 @@
+import sys
+import os
+
+# Add the 'src' directory to the path so we can import our modules
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
+
 import pandas as pd
 import numpy as np
 import logging
@@ -8,7 +14,7 @@ def test_no_leakage():
     """
     Test that the target variable handling prevents lookahead bias.
     """
-    # Create dummy data - Note: freq='h' (lowercase) for modern Pandas
+    # Create dummy data
     df = pd.DataFrame({
         'open': np.random.rand(100),
         'high': np.random.rand(100),
@@ -26,7 +32,7 @@ def test_no_leakage():
     # Check 2: Verify length is reduced (dropped the last 12 rows + feature warm-up)
     assert len(df_labeled) < 100
     
-    logging.info("✓ Leakage Test Passed: Target is isolated and future-safe.")
+    logging.info("Leakage Test Passed.")
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

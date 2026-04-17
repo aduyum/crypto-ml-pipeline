@@ -40,3 +40,11 @@ The `live_trader.py` execution engine polls the Binance API, calculates dynamic 
 The pipeline deliberately sacrifices raw accuracy (stabilizing around **~34-35%**) to achieve realistic, actionable trading metrics. 
 
 Initially, naive models achieved \~50% accuracy by blindly predicting "Hold" (the majority class), yielding a "Buy/Sell" recall of just 2\%. By implementing **Combinatorial Purging** (removing overlapping label leakage) and **Balanced Sample Weighting**, the model's actionable minority-class recall jumped to **~35-40%**. 
+
+## Model Interpretability
+To avoid 'black-box' decision making, the pipeline includes an explainability module (`src/explain.py`). 
+![image](assets/feature_importance.png)
+Analysis of the production XGBoost model via Feature Gain shows that:
+1. **Volume Flow (OBV)** is the primary driver of alpha.
+2. **Higher-Order Statistics (Skewness/Kurtosis)** provide significant predictive power over simple momentum indicators.
+3. **Volatility Regimes** successfully differentiate market states, as evidenced by the high importance of rolling volatility features.
