@@ -6,3 +6,5 @@ xgboost
 pyarrow
 torch
 joblib
+shap
+matplotlib
