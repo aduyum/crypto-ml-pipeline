@@ -17,9 +17,10 @@ This repository implements a production-grade machine learning pipeline for clas
     - **Statistical Moments**: Rolling Skewness & Kurtosis to capture non-normal return distributions.
     - **Market Regimes**: Unsupervised Gaussian Mixture Models (GMM) to classify high vs. low volatility states.
 3. `labels.py`: Classification targeting using a triple-barrier-style volatility adjusted approach.
-4. `portfolio.py`: Capital allocation scaling via ATR and model probability confidence.
-5. `walk_forward.py`: The cross-validation engine.
-6. `Dockerfile`: Containerization for deployment to institutional-grade compute (e.g., OVH Cloud).
+4. `models.py`: Deep Learning sequence models (Gated Recurrent Units / GRU) with sliding lookback windows to capture temporal market memory, optimized with AdamW and gradient clipping.
+5. `portfolio.py`: Capital allocation scaling via ATR and model probability confidence.
+6. `walk_forward.py`: The cross-validation engine.
+7. `Dockerfile`: Containerization for deployment to institutional-grade compute (e.g., OVH Cloud).
 
 ## How to Run
 Ensure you have Docker installed:
