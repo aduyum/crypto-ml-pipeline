@@ -4,3 +4,4 @@ ccxt
 scikit-learn
 xgboost
 pyarrow
+torch
