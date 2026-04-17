@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  live_trader:
+    build: .
+    container_name: crypto_live_trader
+    restart: unless-stopped
+    command: ["python", "src/live_trader.py"]
+    volumes:
+      - ./models:/app/models
+    environment:
+      - TZ=Europe/Amsterdam
