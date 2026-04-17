@@ -11,7 +11,10 @@ This repository implements a production-grade machine learning pipeline for clas
 
 ## Technical Architecture
 1. `data_fetcher.py`: Automated OHLCV retrieval and Parquet storage.
-2. `features.py`: Time-series signal extraction (Momentum, Volatility, Volume).
+2. `features.py`: Advanced feature engineering including:
+    - **Momentum/Volume**: RSI, MACD, OBV.
+    - **Statistical Moments**: Rolling Skewness & Kurtosis to capture non-normal return distributions.
+    - **Market Regimes**: Unsupervised Gaussian Mixture Models (GMM) to classify high vs. low volatility states.
 3. `labels.py`: Classification targeting using a triple-barrier-style volatility adjusted approach.
 4. `walk_forward.py`: The cross-validation engine.
 5. `Dockerfile`: Containerization for deployment to institutional-grade compute (e.g., OVH Cloud).
