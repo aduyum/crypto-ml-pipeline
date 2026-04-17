@@ -29,16 +29,21 @@ class QuantSequenceModel(nn.Module):
 
 class PyTorchSequenceClassifier:
     """A scikit-learn style wrapper for our PyTorch Sequence Network."""
-    def __init__(self, input_dim, seq_length=12, epochs=25, lr=0.001, batch_size=64):
+    def __init__(self, input_dim, seq_length=12, epochs=25, lr=0.001, batch_size=64, class_weights=None):
         self.seq_length = seq_length
         self.epochs = epochs
         self.batch_size = batch_size
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = QuantSequenceModel(input_dim).to(self.device)
         
-        # TODO: Add class weights for imbalanced data
-        self.criterion = nn.CrossEntropyLoss()
-        self.optimizer = optim.AdamW(self.model.parameters(), lr=lr, weight_decay=1e-4) # AdamW for better regularization
+        # Balanced CE Loss
+        if class_weights is not None:
+            weight_tensor = torch.FloatTensor(class_weights).to(self.device)
+            self.criterion = nn.CrossEntropyLoss(weight=weight_tensor)
+        else:
+            self.criterion = nn.CrossEntropyLoss()
+            
+        self.optimizer = optim.AdamW(self.model.parameters(), lr=lr, weight_decay=1e-4)
 
     def _create_sequences(self, X):
         """
