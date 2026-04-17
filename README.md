@@ -23,15 +23,20 @@ This repository implements a machine learning pipeline for classifying cryptocur
 6. `walk_forward.py`: Nested Cross-Validation engine evaluating the Model Zoo using strictly out-of-sample metrics.
 7. `Dockerfile`: Containerization for deployment to institutional-grade compute (e.g., OVH Cloud).
 
-## How to Run
-Ensure you have Docker installed:
+## Deployment & Live Execution (Docker / OVH Cloud)
+The system is designed for containerized deployment on cloud VPS (e.g., OVH Cloud) using `docker-compose`.
 
+1. **Train the Production Model:**
 ```bash
-docker build -t crypto-pipeline .
-docker run crypto-pipeline
+python src/train_prod.py
 ```
+2. **Deploy the Live Trading Engine:**
+```bash
+docker-compose up --build -d
+```
+The `live_trader.py` execution engine polls the Binance API, calculates dynamic regimes, evaluates the production XGBoost model, and applies Kelly-style volatility-adjusted position sizing to output live execution signals.
 
 ## Performance Note
 The pipeline deliberately sacrifices raw accuracy (stabilizing around **~34-35%**) to achieve realistic, actionable trading metrics. 
 
-Initially, naive models achieved ~50% accuracy by blindly predicting "Hold" (the majority class), yielding a "Buy/Sell" recall of just 2%—a classic trap in financial machine learning. By implementing **Combinatorial Purging** (removing overlapping label leakage) and **Balanced Sample Weighting**, the model's actionable minority-class recall jumped to **~35-40%**. 
+Initially, naive models achieved \~50% accuracy by blindly predicting "Hold" (the majority class), yielding a "Buy/Sell" recall of just 2\%. By implementing **Combinatorial Purging** (removing overlapping label leakage) and **Balanced Sample Weighting**, the model's actionable minority-class recall jumped to **~35-40%**. 
