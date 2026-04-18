@@ -23,6 +23,7 @@ This repository implements a machine learning pipeline for classifying cryptocur
 5. `portfolio.py`: Capital allocation scaling via ATR and model probability confidence.
 6. `walk_forward.py`: Nested Cross-Validation engine evaluating the Model Zoo using strictly out-of-sample metrics.
 7. `Dockerfile`: Containerization for deployment to institutional-grade compute (e.g., OVH Cloud).
+8. `live_trader.py`: Designed for institutional robustness. Features continuous polling, automated inventory state reconciliation (calculating trade deltas), and network error handling with exponential backoff to handle Binance API rate limits and disconnects.
 
 ## Deployment & Live Execution (Docker / OVH Cloud)
 The system is designed for containerized deployment on cloud VPS (e.g., OVH Cloud) using `docker-compose`.
