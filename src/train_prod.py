@@ -3,6 +3,7 @@ import os
 import joblib
 import logging
 from xgboost import XGBClassifier
+from sklearn.model_selection import RandomizedSearchCV, TimeSeriesSplit
 from sklearn.utils.class_weight import compute_sample_weight
 from data_fetcher import fetch_binance_data
 from features import add_features
@@ -22,10 +23,10 @@ def train_production_model():
     df_features = add_features(df_raw)
     df_labeled = add_labels(df_features)
     
-    # Drop the lookahead rows
+    # Drop the lookahead rows (the most recent rows where Future_Return is NaN)
     df_labeled = df_labeled.iloc[:-12]
     
-    drop_cols =['open', 'high', 'low', 'close', 'volume', 'Target']
+    drop_cols =['open', 'high', 'low', 'close', 'volume', 'Target', 'Future_Return']
     feature_cols =[col for col in df_labeled.columns if col not in drop_cols]
     
     X = df_labeled[feature_cols]
@@ -33,21 +34,30 @@ def train_production_model():
     
     sample_weights = compute_sample_weight('balanced', y=y)
     
-    # Best parameters discovered from walk-forward RandomizedSearchCV
-    best_xgb = XGBClassifier(
-        n_estimators=100, 
-        max_depth=5, 
-        learning_rate=0.05, 
-        random_state=42, 
-        n_jobs=-1
+    logging.info("Dynamically tuning hyperparameters on all historical data...")
+    tscv = TimeSeriesSplit(n_splits=5)
+    param_grid = {
+        'max_depth':[3, 5, 7],
+        'learning_rate':[0.01, 0.05, 0.1],
+        'n_estimators':[50, 100, 200]
+    }
+    
+    base_xgb = XGBClassifier(random_state=42, n_jobs=-1)
+    
+    tuned_xgb = RandomizedSearchCV(
+        base_xgb, param_distributions=param_grid, n_iter=5, 
+        cv=tscv, scoring='f1_macro', n_jobs=-1, random_state=42
     )
     
-    logging.info("Fitting Final XGBoost Model on all historical data...")
-    best_xgb.fit(X, y, sample_weight=sample_weights)
+    tuned_xgb.fit(X, y, sample_weight=sample_weights)
+    best_model = tuned_xgb.best_estimator_
+    
+    logging.info(f"Optimal parameters found: {tuned_xgb.best_params_}")
+    logging.info("Final XGBoost Model fitted successfully!")
     
     os.makedirs('models', exist_ok=True)
     model_path = 'models/xgb_prod.pkl'
-    joblib.dump(best_xgb, model_path)
+    joblib.dump(best_model, model_path)
     
     logging.info(f"Production model saved successfully to {model_path}!")
 

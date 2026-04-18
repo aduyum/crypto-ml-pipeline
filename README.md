@@ -38,6 +38,8 @@ The system is designed for containerized deployment on cloud VPS (e.g., OVH Clou
 ```bash
 python src/train_prod.py
 ```
+*(This script dynamically searches for optimal hyperparameters using `TimeSeriesSplit` on all available historical data, guaranteeing the live model is tuned to the most recent market regimes before saving the `.pkl` file).*
+
 2. **Deploy the Live Trading Engine:**
 ```bash
 docker-compose up --build -d
