@@ -18,7 +18,7 @@ def add_labels(df, lookahead=12, atr_multiplier=1.5):
     df.loc[sell_condition, 'Target'] = 2
     
     df.dropna(subset=['Future_Close'], inplace=True)
-    df.drop(columns=['Future_Close', 'Future_Return', 'ATR_Pct'], inplace=True)
+    df.drop(columns=['Future_Close', 'ATR_Pct'], inplace=True)
     
     dist = df['Target'].value_counts(normalize=True) * 100
     logging.info(f"Labels generated. Class Dist: Hold={dist.get(0,0):.1f}%, Buy={dist.get(1,0):.1f}%, Sell={dist.get(2,0):.1f}%")

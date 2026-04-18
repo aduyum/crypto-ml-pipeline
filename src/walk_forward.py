@@ -9,17 +9,21 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.utils.class_weight import compute_class_weight, compute_sample_weight
 from xgboost import XGBClassifier
 from models import PyTorchSequenceClassifier
+from backtest_metrics import calculate_financial_metrics
+import pandas as pd
 
 warnings.filterwarnings('ignore')
 
 def run_walk_forward(df, train_window=1000, test_size=200, lookahead=12):
     logging.info("Starting Nested Walk-Forward Validation with Purging & Class Balancing...")
     
-    drop_cols = ['open', 'high', 'low', 'close', 'volume', 'Target']
+    drop_cols =['open', 'high', 'low', 'close', 'volume', 'Target', 'Future_Return']
     feature_cols =[col for col in df.columns if col not in drop_cols]
     
     models_to_test =['Baseline_LogReg', 'RandomForest', 'Tuned_XGBoost', 'PyTorch_GRU']
-    all_y_true = []
+    all_y_true =[]
+    all_future_returns = []
+    all_dates =[]
     predictions = {model:[] for model in models_to_test}
     
     total_steps = (len(df) - train_window) // test_size
@@ -79,6 +83,8 @@ def run_walk_forward(df, train_window=1000, test_size=200, lookahead=12):
         predictions['PyTorch_GRU'].extend(nn_model.predict(X_test_scaled))
         
         all_y_true.extend(test_df['Target'].values)
+        all_future_returns.extend(test_df['Future_Return'].values)
+        all_dates.extend(test_df.index)
         
         logging.info(f"Fold {step+1:02d}/{total_steps} | Tested until {test_df.index[-1].date()} | Best XGB Params: {tuned_xgb.best_params_}")
         
@@ -88,4 +94,12 @@ def run_walk_forward(df, train_window=1000, test_size=200, lookahead=12):
         logging.info(f"--- {model_name} (Macro F1: {f1_macro:.3f}) ---")
         logging.info("\n" + classification_report(all_y_true, predictions[model_name], target_names=['Hold', 'Buy', 'Sell']))
         
+    # Run financial backtest on the best model (Tuned_XGBoost)
+    df_results = pd.DataFrame({
+        'Future_Return': all_future_returns,
+        'Prediction': predictions['Tuned_XGBoost']
+    }, index=all_dates)
+    
+    calculate_financial_metrics(df_results, fee_pct=0.001)
+
     return all_y_true, predictions
