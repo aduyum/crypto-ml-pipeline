@@ -10,6 +10,7 @@ This repository implements a machine learning pipeline for classifying cryptocur
 - **Leakage Prevention (Purging)**: Implements combinatorial purging (inspired by Marcos López de Prado) to drop training samples whose lookahead windows overlap with the out-of-sample test set.
 - **Class Imbalance Handling**: Dynamic class and sample weighting force the models to focus on actionable minority classes (Buy/Sell) rather than defaulting to the majority class (Hold).
 - **Risk Management & Position Sizing**: Translates model confidence (`predict_proba`) into dynamic position sizes. Capital allocation is scaled inversely by volatility (ATR) and directly by the model's probabilistic certainty, mimicking institutional Kelly-criterion implementations.
+- **Financial Backtesting & Realistic PnL**: Goes beyond ML metrics (F1-Score) to calculate actionable financial metrics. The out-of-sample backtest factors in **0.1% Binance maker/taker fees**, computing the Sharpe Ratio, Max Drawdown, and Win Rate to prove strategy viability.
 
 ## Technical Architecture
 1. `data_fetcher.py`: Automated OHLCV retrieval and Parquet storage.
@@ -37,13 +38,19 @@ docker-compose up --build -d
 The `live_trader.py` execution engine polls the Binance API, calculates dynamic regimes, evaluates the production XGBoost model, and applies Kelly-style volatility-adjusted position sizing to output live execution signals.
 
 ## Performance Note
+
+![image](assets/equity_curve.png)
+*(Out-of-Sample Equity curve demonstrating strategy PnL vs Buy & Hold, accounting for 0.1% trading fees).*
+
 The pipeline deliberately sacrifices raw accuracy (stabilizing around **~34-35%**) to achieve realistic, actionable trading metrics. 
 
 Initially, naive models achieved \~50% accuracy by blindly predicting "Hold" (the majority class), yielding a "Buy/Sell" recall of just 2\%. By implementing **Combinatorial Purging** (removing overlapping label leakage) and **Balanced Sample Weighting**, the model's actionable minority-class recall jumped to **~35-40%**. 
 
 ## Model Interpretability
 To avoid 'black-box' decision making, the pipeline includes an explainability module (`src/explain.py`). 
+
 ![image](assets/feature_importance.png)
+
 Analysis of the production XGBoost model via Feature Gain shows that:
 1. **Volume Flow (OBV)** is the primary driver of alpha.
 2. **Higher-Order Statistics (Skewness/Kurtosis)** provide significant predictive power over simple momentum indicators.
