@@ -36,8 +36,8 @@ def run_walk_forward(df, train_window=1000, test_size=200, lookahead=12):
         train_df = df.iloc[train_start:train_end]
         test_df = df.iloc[train_end:test_end]
         
-        # The last 'lookahead' rows of the train_df use future data that overlaps with test_df.
-        # Drop them to prevent data leakage.
+        # Apply purging, the last 'lookahead' rows of the train_df contain future data 
+        # that overlaps with test_df. We drop these to prevent lookahead bias/leakage.
         train_df = train_df.iloc[:-lookahead]
         
         y_train = train_df['Target'].values
